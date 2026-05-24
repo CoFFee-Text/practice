@@ -1,23 +1,15 @@
 package ci.nsu.mobile.main
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
+import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import ci.nsu.mobile.main.ui.theme.PracticeTheme
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.navigation.NavHostController
@@ -28,19 +20,34 @@ import androidx.navigation.compose.rememberNavController
 import ci.nsu.mobile.main.Screens.MainScreen
 import ci.nsu.mobile.main.Screens.LoginScreen
 import ci.nsu.mobile.main.Screens.RegistrationScreen
+import ci.nsu.mobile.main.Repository.AuthRepository
 import ci.nsu.mobile.main.ViewModel.AuthViewModel
+import ci.nsu.mobile.main.Token.TokenManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        TokenManager.init(this)
         enableEdgeToEdge()
         setContent {
             PracticeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     val navController = rememberNavController()
+
+                    val repository = remember {
+                        AuthRepository()
+                    }
+
+                    val viewModel = remember {
+                        AuthViewModel(repository)
+                    }
+
                     MainScreenActivity(
                         navController = navController,
-                        modifier = Modifier.padding(innerPadding)
+                        viewModel = viewModel,
+                        modifier = Modifier
                     )
                 }
             }
@@ -49,28 +56,60 @@ class MainActivity : ComponentActivity() {
 }
 
 sealed class ScreenRoutes(val route: String) {
-    object MainActivity : ScreenRoutes("MainScreen")
+    object Main : ScreenRoutes("MainScreen")
     object Login : ScreenRoutes("LoginScreen")
     object Registration : ScreenRoutes("RegistrationScreen")
 }
 
 @Composable
-fun MainScreenActivity(navController: NavHostController, modifier: Modifier = Modifier) {
-    val viewModel: AuthViewModel = viewModel()
-
+fun MainScreenActivity(navController: NavHostController,
+                       viewModel: AuthViewModel,
+                       modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = ScreenRoutes.MainActivity.route,
+        startDestination = ScreenRoutes.Login.route,
         modifier = modifier
     ) {
-        composable(ScreenRoutes.MainActivity.route) {
-            MainScreen(navController, viewModel, modifier)
-        }
         composable(ScreenRoutes.Login.route) {
-            LoginScreen(navController, viewModel, modifier)
+            LoginScreen(
+                viewModel = viewModel,
+                onLoginSuccess = {
+                    navController.navigate(ScreenRoutes.Main.route) {
+                        popUpTo(ScreenRoutes.Login.route) {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate(ScreenRoutes.Registration.route)
+                }
+            )
         }
+
+        composable(ScreenRoutes.Main.route) {
+            MainScreen(
+                viewModel = viewModel,
+                onLogout = {
+                    viewModel.logout()
+                    navController.navigate(ScreenRoutes.Login.route) {
+                        popUpTo(ScreenRoutes.Main.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
         composable(ScreenRoutes.Registration.route) {
-            RegistrationScreen(navController, viewModel, modifier)
+            RegistrationScreen(
+                viewModel = viewModel,
+                onRegisterSuccess = {
+                    navController.popBackStack()
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

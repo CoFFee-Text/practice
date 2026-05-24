@@ -6,7 +6,7 @@ import ci.nsu.mobile.main.Token.TokenManager
 
 class AuthRepository {
 
-    private val api = ApiService()
+    private val api = ApiService
 
     suspend fun login(
         login: String,
@@ -14,17 +14,11 @@ class AuthRepository {
     ): Result<UserDto?> {
 
         return try {
-
-            val response = api.login(
-                LoginRequest(login, password)
-            )
-
+            val response = api.login(LoginRequest(login, password))
             TokenManager.token = response.token
-
             Result.success(null)
-
-        } catch (e: Exception) {
-
+        }
+        catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -33,13 +27,10 @@ class AuthRepository {
     ): Result<Unit> {
 
         return try {
-
             api.register(request)
-
             Result.success(Unit)
-
-        } catch (e: Exception) {
-
+        }
+        catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -47,23 +38,18 @@ class AuthRepository {
     suspend fun getUsers(): Result<List<UserDto>> {
 
         return try {
-
             Result.success(api.getUsers())
-
-        } catch (e: Exception) {
-
+        }
+        catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     suspend fun getGroups(): Result<List<GroupDto>> {
-
         return try {
-
             Result.success(api.getGroups())
-
-        } catch (e: Exception) {
-
+        }
+        catch (e: Exception) {
             Result.failure(e)
         }
     }
