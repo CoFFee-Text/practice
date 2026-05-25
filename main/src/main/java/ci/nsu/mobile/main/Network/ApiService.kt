@@ -5,6 +5,7 @@ import ci.nsu.mobile.main.DataModels.LoginRequest
 import ci.nsu.mobile.main.DataModels.LoginResponse
 import ci.nsu.mobile.main.DataModels.RegisterRequest
 import ci.nsu.mobile.main.DataModels.UserDto
+import ci.nsu.mobile.main.Token.TokenManager
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -14,6 +15,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.*
 
 object ApiService {
     var baseUrl: String = "http://192.168.200.160:8080/api/"
@@ -27,10 +29,15 @@ object ApiService {
             })
         }
 
-        engine {
-            config {
-                interceptors().add(AuthInterceptor())
-            }
+        install(DefaultRequest) {
+            header("Content-Type", "application/json")
+        }
+    }
+
+    private suspend fun HttpRequestBuilder.addAuthToken() {
+        val token = TokenManager.token
+        if (token != null) {
+            header("Authorization", "Bearer $token")
         }
     }
 
@@ -49,10 +56,14 @@ object ApiService {
     }
 
     suspend fun getUsers(): List<UserDto> {
-        return client.get("${baseUrl}users").body()
+        return client.get("${baseUrl}users") {
+            addAuthToken()
+        }.body()
     }
 
     suspend fun getGroups(): List<GroupDto> {
-        return client.get("${baseUrl}groups").body()
+        return client.get("${baseUrl}groups") {
+            addAuthToken()
+        }.body()
     }
 }

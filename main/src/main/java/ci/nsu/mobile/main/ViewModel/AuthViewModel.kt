@@ -33,7 +33,7 @@ class AuthViewModel(
 
     fun login(login: String, password: String, onSuccess: () -> Unit) {
         if (login.isBlank() || password.isBlank()) {
-            error = "Заполните логин и пароль"
+            error = "Fill in your username and password"
             return
         }
         viewModelScope.launch {
@@ -44,7 +44,7 @@ class AuthViewModel(
                     isLoggedIn = true
                     onSuccess()
                 }.onFailure {
-                    error = it.message ?: "Ошибка входа"
+                    error = it.message ?: "Login error"
                 }
             } finally {
                 isLoading = false
@@ -60,7 +60,7 @@ class AuthViewModel(
                 repository.register(request).onSuccess {
                     onSuccess()
                 }.onFailure {
-                    error = it.message ?: "Ошибка регистрации"
+                    error = it.message ?: "Registration error"
                 }
             } finally {
                 isLoading = false
@@ -74,7 +74,7 @@ class AuthViewModel(
             error = null
             try {
                 repository.getUsers().onSuccess { users = it }
-                    .onFailure { error = it.message ?: "Ошибка загрузки пользователей" }
+                    .onFailure { error = it.message ?: "User upload error" }
             } finally {
                 isLoading = false
             }

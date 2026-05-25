@@ -219,10 +219,6 @@ fun RegistrationScreen(
             }
         }
 
-        if (viewModel.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-        }
-
         viewModel.error?.let {
             Text(it, color = Color.Red)
         }
