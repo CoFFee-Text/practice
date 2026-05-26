@@ -205,6 +205,7 @@ fun RegistrationScreen(
 
                 viewModel.register(request) {
                     onRegisterSuccess()
+                    onNavigateBack()
                 }
             },
             modifier = Modifier.fillMaxWidth(),
