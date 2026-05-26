@@ -56,21 +56,47 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(viewModelFactory: ViewModelFactory) {
-    val navController = rememberNavController()
-    val authViewModel: AuthViewModel = viewModel(factory = viewModelFactory)
+//    val navController = rememberNavController()
+//    val authViewModel: AuthViewModel = viewModel(factory = viewModelFactory)
+//
+//    val isLoggedIn by remember {
+//        derivedStateOf { TokenManager.isLoggedIn() && UserManager.isLoggedIn() }
+//    }
+//
+//    if (!isLoggedIn) {
+//        AuthNavHost(navController, authViewModel) {
+//            navController.navigate("main") {
+//                popUpTo(0) { inclusive = true }
+//            }
+//        }
+//    } else {
+//        MainAppNavHost(navController, authViewModel, viewModelFactory)
+//    }
 
-    val isLoggedIn by remember {
-        derivedStateOf { TokenManager.isLoggedIn() && UserManager.isLoggedIn() }
+    // ВЫНОСИМ СОСТОЯНИЕ ВОВНЕ
+    var isLoggedIn by remember {
+        mutableStateOf(TokenManager.isLoggedIn() && UserManager.isLoggedIn())
     }
 
+    val authViewModel: AuthViewModel = viewModel(factory = viewModelFactory)
+
     if (!isLoggedIn) {
-        AuthNavHost(navController, authViewModel) {
-            navController.navigate("main") {
-                popUpTo(0) { inclusive = true }
+        AuthNavHost(
+            navController = rememberNavController(),
+            authViewModel = authViewModel,
+            onLoginSuccess = {
+                isLoggedIn = true
             }
-        }
+        )
     } else {
-        MainAppNavHost(navController, authViewModel, viewModelFactory)
+        MainAppNavHost(
+            navController = rememberNavController(),
+            authViewModel = authViewModel,
+            viewModelFactory = viewModelFactory,
+            onLogout = {
+                isLoggedIn = false
+            }
+        )
     }
 }
 
@@ -91,7 +117,9 @@ fun AuthNavHost(
         composable("register") {
             RegistrationScreen(
                 viewModel = authViewModel,
-                onRegisterSuccess = onLoginSuccess,
+                onRegisterSuccess = {
+                navController.popBackStack()
+            },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -103,21 +131,20 @@ fun AuthNavHost(
 fun MainAppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    viewModelFactory: ViewModelFactory
+    viewModelFactory: ViewModelFactory,
+    onLogout: () -> Unit
 ) {
     val depositViewModel: DepositViewModel = viewModel(factory = viewModelFactory)
 
+    LaunchedEffect(Unit) {
+        authViewModel.loadUsers()
+    }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Calculation of deposits") },
                 actions = {
-                    IconButton(onClick = {
-                        authViewModel.logout()
-                        navController.navigate("login") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }) {
+                    IconButton(onClick = onLogout) {
                         Text("Leave")
                     }
                 }
@@ -130,19 +157,19 @@ fun MainAppNavHost(
                 NavigationBarItem(
                     selected = currentRoute == "calculate",
                     onClick = { navController.navigate("calculate") },
-                    icon = { },
+                    icon = { Text("Icon1")},
                     label = { Text("Calculation") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == "history",
                     onClick = { navController.navigate("history") },
-                    icon = { },
+                    icon = { Text("Icon2") },
                     label = { Text("History") }
                 )
                 NavigationBarItem(
                     selected = currentRoute == "users",
                     onClick = { navController.navigate("users") },
-                    icon = { },
+                    icon = { Text("Icon3") },
                     label = { Text("Users") }
                 )
             }
@@ -182,42 +209,3 @@ fun CalculationNavHost(depositViewModel: DepositViewModel) {
         }
     }
 }
-
-//@Composable
-//fun UsersScreen(viewModel: AuthViewModel) {
-//    LaunchedEffect(Unit) {
-//        viewModel.loadUsers()
-//    }
-//
-//    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-//        Text(
-//            text = "Users list",
-//            modifier = Modifier.padding(bottom = 16.dp)
-//        )
-//
-//        if (viewModel.isLoading) {
-//            Box(modifier = Modifier.fillMaxSize()) {
-//                CircularProgressIndicator()
-//            }
-//        } else {
-//            LazyColumn {
-//                items(viewModel.users) { user ->
-//                    Card(
-//                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-//                    ) {
-//                        Column(modifier = Modifier.padding(12.dp)) {
-//                            Text("ID: ${user.id}")
-//                            Text("Login: ${user.login}")
-//                            Text("Email: ${user.email}")
-//                            // здесь же можно вызвать метод UserCard?
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        viewModel.error?.let {
-//            Text(it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
-//        }
-//    }
-//}

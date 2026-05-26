@@ -5,7 +5,6 @@ import ci.nsu.mobile.main.Network.ApiService
 import ci.nsu.mobile.main.Token.*
 
 class AuthRepository {
-
     private val api = ApiService
 
     suspend fun login(
@@ -17,7 +16,6 @@ class AuthRepository {
             val response = api.login(LoginRequest(login, password))
             TokenManager.token = response.token
 
-            // Получаем пользователя, чтобы узнать его ID
             val users = api.getUsers()
             val currentUser = users.find { it.login == login }
 

@@ -149,6 +149,83 @@ fun RegistrationScreen(
             modifier = Modifier.fillMaxWidth().padding(5.dp)
         )
 
+//        Button(
+//            onClick = {
+//                val cleanLogin = login.trim()
+//                val cleanEmail = email.trim()
+//                val cleanPassword = password
+//
+//                when {
+//                    cleanLogin.isBlank() -> {
+//                        viewModel.setValidationError("Enter login")
+//                        return@Button
+//                    }
+//                    cleanPassword.isBlank() -> {
+//                        viewModel.setValidationError("Enter password")
+//                        return@Button
+//                    }
+//                    !cleanEmail.contains("@") || cleanEmail.count { it == '@' } != 1 || !cleanEmail.substringAfter("@").contains(".") -> {
+//                        viewModel.setValidationError("Enter email")
+//                        return@Button
+//                    }
+//                    firstName.isBlank() -> {
+//                        viewModel.setValidationError("Enter name")
+//                        return@Button
+//                    }
+//                    lastName.isBlank() -> {
+//                        viewModel.setValidationError("Enter surname")
+//                        return@Button
+//                    }
+//                }
+//
+//                val formattedBirthDate = if (birthDate.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) {
+//                    birthDate
+//                } else {
+//                    birthDate.split(".").reversed().joinToString("-").take(10)
+//                }
+//
+//                val person = PersonDto(
+//                    firstName = firstName.trim(),
+//                    lastName = lastName.trim(),
+//                    middleName = middleName.ifBlank { "" },
+//                    birthDate =formattedBirthDate,
+//                    gender = gender.ifBlank { "other" },
+//                    groupId = selectedGroupId ?: 1
+//                )
+//
+//                val request = RegisterRequest(
+//                    login = cleanLogin.trim(),
+//                    password = cleanPassword,
+//                    email = cleanEmail.trim(),
+//                    phoneNumber = phone.ifBlank { "" },
+//                    roleId = 1,
+//                    authAllowed = true,
+//                    person = person
+//                )
+//
+//                viewModel.register(request) {
+//                    onRegisterSuccess()
+//                }
+//            },
+//            modifier = Modifier.fillMaxWidth(),
+//            enabled = !viewModel.isLoading
+//        ) {
+//            if (viewModel.isLoading) {
+//                CircularProgressIndicator(
+//                    modifier = Modifier.size(24.dp)
+//                )
+//            } else {
+//                Text("Register")
+//            }
+//        }
+//
+//        if (viewModel.isLoading) {
+//            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+//        }
+//
+//        viewModel.error?.let {
+//            Text(it, color = Color.Red)
+//        }
         Button(
             onClick = {
                 val cleanLogin = login.trim()
@@ -217,10 +294,6 @@ fun RegistrationScreen(
             } else {
                 Text("Register")
             }
-        }
-
-        if (viewModel.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(24.dp))
         }
 
         viewModel.error?.let {

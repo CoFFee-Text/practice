@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
@@ -16,11 +17,24 @@ import androidx.lifecycle.ViewModel
 import ci.nsu.mobile.main.Token.UserManager
 
 class DepositViewModel(private val repository: DepositRepository) : ViewModel() {
-    var history: LiveData<List<DepositCalculation>> = repository.getAllCalculationsForUser(UserManager.currentUserId)
-//    init {
-//        println("DepositViewModel: currentUserId = ${UserManager.currentUserId}")
-//        history = repository.getAllCalculationsForUser(UserManager.currentUserId)
-//    }
+    private var _history = MutableLiveData<List<DepositCalculation>>()
+    val history: LiveData<List<DepositCalculation>> = _history
+
+    fun loadHistoryForUser(userId: Long) {
+        viewModelScope.launch {
+            repository.getAllCalculationsForUser(userId).observeForever {
+                _history.value = it
+            }
+        }
+    }
+
+    init {
+        loadHistoryForUser(UserManager.currentUserId)
+    }
+
+    fun refreshHistory() {
+        loadHistoryForUser(UserManager.currentUserId)
+    }
     var initialAmount by mutableStateOf("")
     var periodMonths by mutableStateOf("")
     var interestRate by mutableDoubleStateOf(0.0)
