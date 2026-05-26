@@ -56,24 +56,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(viewModelFactory: ViewModelFactory) {
-//    val navController = rememberNavController()
-//    val authViewModel: AuthViewModel = viewModel(factory = viewModelFactory)
-//
-//    val isLoggedIn by remember {
-//        derivedStateOf { TokenManager.isLoggedIn() && UserManager.isLoggedIn() }
-//    }
-//
-//    if (!isLoggedIn) {
-//        AuthNavHost(navController, authViewModel) {
-//            navController.navigate("main") {
-//                popUpTo(0) { inclusive = true }
-//            }
-//        }
-//    } else {
-//        MainAppNavHost(navController, authViewModel, viewModelFactory)
-//    }
-
-    // ВЫНОСИМ СОСТОЯНИЕ ВОВНЕ
     var isLoggedIn by remember {
         mutableStateOf(TokenManager.isLoggedIn() && UserManager.isLoggedIn())
     }
