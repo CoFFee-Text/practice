@@ -75,14 +75,5 @@ fun FirstStageScreen(navController: NavController, viewModel: DepositViewModel, 
         ) {
             Text("Further")
         }
-        Button(
-            onClick = {
-                viewModel.clearData()
-                navController.navigate("calculate")
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Back to the Main Screen")
-        }
     }
 }

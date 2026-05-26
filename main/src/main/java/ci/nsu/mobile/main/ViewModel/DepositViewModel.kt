@@ -17,24 +17,31 @@ import androidx.lifecycle.ViewModel
 import ci.nsu.mobile.main.Token.UserManager
 
 class DepositViewModel(private val repository: DepositRepository) : ViewModel() {
-    private var _history = MutableLiveData<List<DepositCalculation>>()
+//    private var _history = MutableLiveData<List<DepositCalculation>>()
+//    val history: LiveData<List<DepositCalculation>> = _history
+//
+//    fun loadHistoryForUser(userId: Long) {
+//        viewModelScope.launch {
+//            repository.getAllCalculationsForUser(userId).observeForever {
+//                _history.value = it
+//            }
+//        }
+//    }
+//
+//    init {
+//        loadHistoryForUser(UserManager.currentUserId)
+//    }
+//
+//    fun refreshHistory() {
+//        loadHistoryForUser(UserManager.currentUserId)
+//    }
+
+    private val _history = MutableLiveData<List<DepositCalculation>>()
     val history: LiveData<List<DepositCalculation>> = _history
 
-    fun loadHistoryForUser(userId: Long) {
-        viewModelScope.launch {
-            repository.getAllCalculationsForUser(userId).observeForever {
-                _history.value = it
-            }
-        }
-    }
+    private var currentUserId: Long = -1L
+    private var historyObserver: androidx.lifecycle.Observer<List<DepositCalculation>>? = null
 
-    init {
-        loadHistoryForUser(UserManager.currentUserId)
-    }
-
-    fun refreshHistory() {
-        loadHistoryForUser(UserManager.currentUserId)
-    }
     var initialAmount by mutableStateOf("")
     var periodMonths by mutableStateOf("")
     var interestRate by mutableDoubleStateOf(0.0)
@@ -42,6 +49,31 @@ class DepositViewModel(private val repository: DepositRepository) : ViewModel() 
 
     var finalAmount by mutableDoubleStateOf(0.0)
     var interestEarned by mutableDoubleStateOf(0.0)
+
+    init {
+        loadHistoryForCurrentUser()
+    }
+
+    fun loadHistoryForCurrentUser() {
+        val userId = UserManager.currentUserId
+
+        if (userId != -1L && userId != currentUserId) {
+            historyObserver?.let {
+                repository.getAllCalculationsForUser(currentUserId).removeObserver(it)
+            }
+
+            currentUserId = userId
+
+            historyObserver = androidx.lifecycle.Observer { calculations ->
+                _history.value = calculations
+            }
+            repository.getAllCalculationsForUser(userId).observeForever(historyObserver!!)
+        }
+    }
+
+    fun refreshHistory() {
+        loadHistoryForCurrentUser()
+    }
 
     fun updateInterestRate(rate: Double) {
         interestRate = rate

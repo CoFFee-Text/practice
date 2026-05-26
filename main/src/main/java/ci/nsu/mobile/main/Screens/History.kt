@@ -77,6 +77,7 @@ fun HistoryStageScreen(navController: NavController, viewModel: DepositViewModel
                             .clickable { isExpanded = !isExpanded }
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
+                            Text("ID: ${item.userId}")
                             Text("Date: ${dateFormat.format(Date(item.calculationDate))}")
                             Text("Starting payment: ${item.initialAmount}")
                             Text("Result: ${String.format("%.2f", item.finalAmount)}")

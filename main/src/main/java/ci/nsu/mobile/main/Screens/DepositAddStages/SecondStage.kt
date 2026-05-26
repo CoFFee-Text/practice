@@ -139,13 +139,5 @@ fun SecondStageScreen(navController: NavController, viewModel: DepositViewModel,
         ) {
             Text("Calculate/Go to the Result")
         }
-        Button(
-            onClick = {
-                navController.navigate("first_stage")
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Back to the First Stage")
-        }
     }
 }

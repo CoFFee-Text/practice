@@ -79,14 +79,5 @@ fun ResultStageScreen(navController: NavController, viewModel: DepositViewModel,
         ) {
             Text("Save Deposit")
         }
-        Button(
-            onClick = {
-                viewModel.clearData()
-                navController.navigate("main")
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Back to the Main Screen")
-        }
     }
 }

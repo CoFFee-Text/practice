@@ -56,6 +56,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(viewModelFactory: ViewModelFactory) {
+    var refreshKey by remember { mutableStateOf(0) }
+
     var isLoggedIn by remember {
         mutableStateOf(TokenManager.isLoggedIn() && UserManager.isLoggedIn())
     }
@@ -68,17 +70,21 @@ fun AppNavigation(viewModelFactory: ViewModelFactory) {
             authViewModel = authViewModel,
             onLoginSuccess = {
                 isLoggedIn = true
+                refreshKey++
             }
         )
     } else {
-        MainAppNavHost(
-            navController = rememberNavController(),
-            authViewModel = authViewModel,
-            viewModelFactory = viewModelFactory,
-            onLogout = {
-                isLoggedIn = false
-            }
-        )
+        key(refreshKey) {
+            MainAppNavHost(
+                navController = rememberNavController(),
+                authViewModel = authViewModel,
+                viewModelFactory = viewModelFactory,
+                onLogout = {
+                    isLoggedIn = false
+                    refreshKey++
+                }
+            )
+        }
     }
 }
 
@@ -119,8 +125,15 @@ fun MainAppNavHost(
     val depositViewModel: DepositViewModel = viewModel(factory = viewModelFactory)
 
     LaunchedEffect(Unit) {
+        depositViewModel.loadHistoryForCurrentUser()
         authViewModel.loadUsers()
     }
+    DisposableEffect(Unit) {
+        onDispose {
+
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
